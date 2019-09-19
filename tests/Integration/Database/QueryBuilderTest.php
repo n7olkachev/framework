@@ -157,6 +157,25 @@ class QueryBuilderTest extends DatabaseTestCase
         $this->assertSame(2, DB::table('posts')->where('id', 1)->orWhereTime('created_at', new Carbon('2018-01-02 03:04:05'))->count());
     }
 
+    public function testWhereWithSubQuery()
+    {
+        $this->assertEquals(
+            1,
+            DB::table('posts')->where(
+                'created_at',
+                DB::table('posts')->selectRaw('min(created_at)')
+            )->value('id')
+        );
+
+        $this->assertEquals(
+            2,
+            DB::table('posts')->where(
+                'created_at',
+                DB::table('posts')->selectRaw('max(created_at)')
+            )->value('id')
+        );
+    }
+
     public function testPaginateWithSpecificColumns()
     {
         $result = DB::table('posts')->paginate(5, ['title', 'content']);
